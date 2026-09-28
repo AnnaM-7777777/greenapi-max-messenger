@@ -1,75 +1,58 @@
-# React + TypeScript + Vite
+# MAX Messenger
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Веб-приложение для обмена текстовыми сообщениями через мессенджер MAX, реализованное с использованием сервиса [Green API](https://green-api.com/max).
 
-Currently, two official plugins are available:
+## 📋 Описание
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Проект представляет собой полнофункциональный чат-клиент, который позволяет:
+- Авторизоваться через сканирование QR-кода
+- Отправлять текстовые сообщения контактам по номеру телефона
+- Получать входящие сообщения в реальном времени
+- Видеть историю переписки с автоматическим обновлением
 
-## React Compiler
+## 🛠 Стек технологий
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 18** — UI-библиотека
+- **TypeScript** — строгая типизация
+- **Vite** — сборщик и dev-сервер
+- **Axios** — HTTP-клиент для работы с API
+- **CSS Modules** — изоляция стилей компонентов
+- **Green API** — сервис для интеграции с MAX
 
-## Expanding the ESLint configuration
+## ✨ Ключевые особенности
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 🔐 Безопасная авторизация
+- QR-код автоматически обновляется каждые 60 секунд
+- Умный таймер истечения срока действия кода
+- Кнопка ручного обновления QR-кода (активируется только после истечения)
+- Фоновая проверка статуса авторизации без спама запросами к API
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 💬 Обмен сообщениями
+- Отправка сообщений через метод `SendMessage`
+- Получение входящих сообщений через polling метода `ReceiveNotification`
+- Оптимистичный UI: сообщение сразу отображается после отправки
+- Автоматическое удаление обработанных уведомлений из очереди
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+###  Интерфейс
+- Адаптивная верстка в стиле современных мессенджеров
+- CSS Modules для полной изоляции стилей
+- Разделение на панель контактов и окно переписки
+- Визуальное разделение входящих и исходящих сообщений
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+###  Архитектура
+- Кастомные хуки (`useQrManager`, `useMessagePolling`) для разделения логики
+- Context API для глобального управления состоянием
+- Строгая типизация всех данных и ответов API
+- Правильная очистка таймеров и интервалов для предотвращения утечек памяти
 
-```
+## 🚀 Установка и запуск
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### Требования
+- Node.js 18+ и npm
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Шаги установки
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+1. Клонируйте репозиторий:
+```bash
+git clone https://github.com/AnnaM-7777777/greenapi-max-messenger.git
+cd greenapi-max-messenger
