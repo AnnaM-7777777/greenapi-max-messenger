@@ -1,68 +1,52 @@
 .chatContainer {
     display: flex;
     height: 100vh;
-    background-color: #e5ddd5; /* Классический фон мессенджеров */
 }
 
 /* Левая панель (список/выбор чата) */
-.sidebar {
-    width: 350px;
-    background-color: #ffffff;
-    border-right: 1px solid #d1d7db;
+.chatSidebar {
+    width: 393px;
+    background-color: var(--bg-primary);
+    border-right: var(--border-line);
     display: flex;
     flex-direction: column;
 }
 
-.sidebarHeader {
+.chatSidebar__header {
     padding: 16px;
-    background-color: #f0f2f5;
-    border-bottom: 1px solid #d1d7db;
+    border-bottom: var(--border-line);
     font-weight: bold;
     font-size: 18px;
-    color: #41525d;
+    color: var(--text-title);
 }
 
-.newChatForm {
+.chatSidebar__newChat {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     padding: 16px;
-    border-bottom: 1px solid #e9edef;
+    border-bottom: var(--border-line);
 }
 
-.phoneInput {
+.chatSidebar__phoneInput {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #d1d7db;
-    border-radius: 8px;
-    font-size: 14px;
-    margin-bottom: 8px;
-    outline: none;
+    border: var(--border-input);
 }
 
-.phoneInput:focus {
-    border-color: #00a884;
-}
+/* .chatSidebar__phoneInput:focus {
+    border-color: var(--border-input);
+} */
 
-.startChatBtn {
+.chatSidebar__btnStartChat {
     width: 100%;
-    padding: 10px;
-    background-color: #00a884;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
     transition: background-color 0.2s;
 }
 
-.startChatBtn:hover {
-    background-color: #008f6f;
-}
-
-.activeChatInfo {
+.chatSidebar__activeChat {
     padding: 16px;
-    background-color: #f0f2f5;
+    background-color: var(--bg-chat);
     font-size: 14px;
-    color: #41525d;
+    color: var(--text-primary);
 }
 
 /* Правая панель (окно переписки) */
@@ -70,8 +54,8 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png"); /* Фон WhatsApp */
-    background-repeat: repeat;
+    background-image: url("../../assets/max-pattern.svg");
+    padding: 16px;
 }
 
 .emptyState {
@@ -79,7 +63,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f0f2f5;
     color: #41525d;
     font-size: 16px;
 }
@@ -125,39 +108,26 @@
 }
 
 /* Панель ввода сообщения */
-.inputArea {
-    padding: 10px 16px;
-    background-color: #f0f2f5;
+.chatWindow__inputForm {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    gap: 16px;
+    background-color: var(--bg-primary);
+    border: var(--border-card);
+    height: 48px !important;
 }
 
-.messageInput {
+.chatWindow__inputArea {
     flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
+    width: 100%;    
+    height: 100%;
     outline: none;
-}
-
-.sendBtn {
-    padding: 10px 20px;
-    background-color: #00a884;
-    color: white;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
 }
 
-.sendBtn:hover {
-    background-color: #008f6f;
-}
-
-.sendBtn:disabled {
-    background-color: #8696a0;
-    cursor: not-allowed;
+.chatWindow__btnSend {
+    width: 100%;
 }

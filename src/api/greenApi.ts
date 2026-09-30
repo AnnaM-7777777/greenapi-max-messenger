@@ -47,17 +47,61 @@ export const greenApi = {
     sendMessage: async (
         chatId: string,
         message: string,
+        typingTime?: number, // Опциональный параметр для эффекта "печатает..."
     ): Promise<SendMessageResponse> => {
+        // 1. Валидация: проверяем длину сообщения (максимум 4000 символов по документации)
+        if (message.length > 4000) {
+            throw new Error("Сообщение не должно превышать 4000 символов");
+        }
+
         const formattedChatId = chatId.includes("@")
             ? chatId
             : `${chatId}@c.us`;
 
-        const response = await axios.post<SendMessageResponse>(
-            `${BASE_URL}/sendMessage/${API_TOKEN_INSTANCE}`,
-            { chatId: formattedChatId, message },
-            { headers: { "Content-Type": "application/json" } },
-        );
-        return response.data;
+        // 2. Формируем тело запроса
+        const requestBody: {
+            chatId: string;
+            message: string;
+            typingTime?: number;
+        } = {
+            chatId: formattedChatId,
+            message,
+        };
+
+        // Добавляем typingTime только если он передан и находится в допустимом диапазоне (1000-20000 мс)
+        if (typingTime && typingTime >= 1000 && typingTime <= 20000) {
+            requestBody.typingTime = typingTime;
+        }
+
+        try {
+            const response = await axios.post<SendMessageResponse>(
+                `${BASE_URL}/sendMessage/${API_TOKEN_INSTANCE}`,
+                requestBody,
+                { headers: { "Content-Type": "application/json" } },
+            );
+            return response.data;
+        } catch (error: unknown) {
+            // 3. Обработка специфичных ошибок API
+            const err = error as AxiosError<{ reason?: string }>;
+            const status = err.response?.status;
+
+            if (status === 400) {
+                throw new Error(
+                    "Ошибка валидации: проверьте параметры сообщения",
+                );
+            }
+            if (status === 403) {
+                throw new Error(
+                    "Аккаунт временно заблокирован или есть ограничения на отправку",
+                );
+            }
+            if (status === 500) {
+                throw new Error("Ошибка сервера: слишком большой запрос");
+            }
+
+            // Пробрасываем остальные ошибки (например, проблемы с сетью)
+            throw err;
+        }
     },
 
     receiveNotification: async (): Promise<Notification | null> => {

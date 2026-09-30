@@ -7,6 +7,7 @@
         rgb(228, 248, 255) 0%,
         rgb(241, 249, 252) 100%
     ); /* Фон карточки (окна) с qr кодом */
+    --bg-chat: rgba(0, 122, 255, 0.078); /* Фон выбранного чата */
 
     /* Кнопки, ссылки */
     --btn-primary: rgb(18, 140, 174);
@@ -24,6 +25,8 @@
 
     /* Границы */
     --border-card: 1px solid rgba(88, 88, 88, 0.102); /* border карточки (окна) с qr кодом */
+    --border-line: 1px solid rgb(209, 215, 219); /* цвет линий разделения */
+    --border-input: 1px solid rgb(18, 140, 174); /* border input */
 
     /* Тени */
     --shadow-all: 0 4px 24px rgba(0, 0, 0, 0.08); /* Тень у блоков */
@@ -67,7 +70,7 @@ a {
         -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-weight: 600;
     font-size: 14px;
-    border-radius: 10px;
+    border-radius: 16px;
     text-decoration: none;
     box-sizing: border-box;
     height: 42px;
@@ -100,4 +103,20 @@ a {
     color: var(--text-secondary);
     cursor: not-allowed;
     opacity: 0.6;
+}
+
+.input-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 16px;
+    box-sizing: border-box;
+    padding: 0 16px;
+    height: 42px;
+    overflow: hidden;
+    outline: none;
 }

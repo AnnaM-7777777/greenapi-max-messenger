@@ -71,24 +71,31 @@ export const ChatInterface = () => {
     return (
         <div className={styles.chatContainer}>
             {/* Левая панель */}
-            <div className={styles.sidebar}>
-                <div className={styles.sidebarHeader}>MAX Messenger</div>
+            <div className={styles.chatSidebar}>
+                <div className={styles.chatSidebar__header}>MAX Messenger</div>
 
-                <form className={styles.newChatForm} onSubmit={handleStartChat}>
+                <form
+                    className={styles.chatSidebar__newChat}
+                    onSubmit={handleStartChat}
+                >
                     <input
                         type="text"
-                        className={styles.phoneInput}
+                        className={`${styles.chatSidebar__phoneInput} input-primary`}
                         placeholder="Введите номер (например, 79991234567)"
                         value={phoneInput}
                         onChange={(e) => setPhoneInput(e.target.value)}
                     />
-                    <button type="submit" className={styles.startChatBtn}>
+
+                    <button
+                        type="submit"
+                        className={`${styles.chatSidebar__btnStartChat} btn-primary`}
+                    >
                         Начать чат
                     </button>
                 </form>
 
                 {currentChatId && (
-                    <div className={styles.activeChatInfo}>
+                    <div className={styles.chatSidebar__activeChat}>
                         Активный чат:{" "}
                         <strong>{currentChatId.replace("@c.us", "")}</strong>
                     </div>
@@ -122,23 +129,33 @@ export const ChatInterface = () => {
                         </div>
 
                         <form
-                            className={styles.inputArea}
+                            className={`${styles.chatWindow__inputForm} input-primary`}
                             onSubmit={handleSendMessage}
                         >
                             <input
                                 type="text"
-                                className={styles.messageInput}
-                                placeholder="Введите сообщение..."
+                                className={styles.chatWindow__inputArea}
+                                placeholder="Сообщение..."
                                 value={messageText}
                                 onChange={(e) => setMessageText(e.target.value)}
                                 disabled={isSending}
                             />
                             <button
                                 type="submit"
-                                className={styles.sendBtn}
                                 disabled={isSending || !messageText.trim()}
+                                aria-label="Отправить сообщение"
                             >
-                                {isSending ? "..." : "Отправить"}
+                                {isSending ? (
+                                    <span className={styles.spinner}>...</span>
+                                ) : (
+                                    <svg
+                                        aria-hidden="true"
+                                        width="24"
+                                        height="24"
+                                    >
+                                        <use href="#icon_send"></use>
+                                    </svg>
+                                )}
                             </button>
                         </form>
                     </>
