@@ -142,6 +142,7 @@ export const ChatInterface = () => {
                             />
                             <button
                                 type="submit"
+                                className={styles.chatWindow__btnSend}
                                 disabled={isSending || !messageText.trim()}
                                 aria-label="Отправить сообщение"
                             >
@@ -149,11 +150,25 @@ export const ChatInterface = () => {
                                     <span className={styles.spinner}>...</span>
                                 ) : (
                                     <svg
-                                        aria-hidden="true"
+                                        xmlns="http://w3.org"
+                                        viewBox="0 0 24 24"
                                         width="24"
                                         height="24"
                                     >
-                                        <use href="#icon_send"></use>
+                                        <rect
+                                            width="24"
+                                            height="24"
+                                            rx="4"
+                                            fill="rgb(18, 140, 174)"
+                                        />
+                                        <path
+                                            d="M12 5v14M12 5l-5 5M12 5l5 5"
+                                            stroke="#FFFFFF"
+                                            stroke-width="1.5"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            fill="none"
+                                        />
                                     </svg>
                                 )}
                             </button>

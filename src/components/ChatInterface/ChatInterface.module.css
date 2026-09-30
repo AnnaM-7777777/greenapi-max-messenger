@@ -87,17 +87,17 @@
 }
 
 .messageIncoming {
-    background-color: #ffffff;
+    background-color: var(--bg-incoming);
     align-self: flex-start;
     border-top-left-radius: 0;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 .messageOutgoing {
-    background-color: #d9fdd3;
+    background-color: var(--bg-outgoing);
     align-self: flex-end;
     border-top-right-radius: 0;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-all);
 }
 
 .messageTime {
@@ -129,5 +129,14 @@
 }
 
 .chatWindow__btnSend {
-    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+    width: fit-content;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;   
 }
