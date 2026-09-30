@@ -11,10 +11,12 @@ export const AuthScreen = () => {
         return (
             <div className={styles.authContainer}>
                 <div className={styles.authCard}>
-                    <h1 className={`${styles.authTitle} ${styles.successText}`}>
+                    <h1
+                        className={`${styles.authCard__title} ${styles.successText}`}
+                    >
                         Успешная авторизация!
                     </h1>
-                    <p className={styles.authSubtitle}>
+                    <p className={styles.authCard__subTitle}>
                         Инстанс подключен. Загрузка интерфейса...
                     </p>
                 </div>
@@ -27,8 +29,8 @@ export const AuthScreen = () => {
         return (
             <div className={styles.authContainer}>
                 <div className={styles.authCard}>
-                    <div className={styles.spinner}></div>
-                    <p className={styles.loadingText}>
+                    <div className={styles.authCard__spinner}></div>
+                    <p className={styles.authCard__loadingText}>
                         Инициализация соединения...
                     </p>
                 </div>
@@ -40,31 +42,31 @@ export const AuthScreen = () => {
     return (
         <div className={styles.authContainer}>
             <div className={styles.authCard}>
-                <h1 className={styles.authTitle}>MAX Messenger</h1>
-                <p className={styles.authSubtitle}>
+                <h1 className={styles.authCard__title}>MAX Messenger</h1>
+                <p className={styles.authCard__subTitle}>
                     Откройте приложение MAX на телефоне, перейдите в Настройки →
                     Связанные устройства → Привязка устройства и отсканируйте
                     этот код.
                 </p>
 
                 {qrCode && !isExpired && (
-                    <div className={styles.qrWrapper}>
+                    <div className={styles.authCard__qrWrapper}>
                         <img
                             src={qrCode}
                             alt="QR Code для авторизации"
-                            className={styles.qrImage}
+                            className={styles.authCard__qrImage}
                         />
                     </div>
                 )}
 
                 {isExpired && (
-                    <p className={styles.expiredText}>
-                        ⚠️ Срок действия QR-кода истек
+                    <p className={styles.authCard__expiredText}>
+                        Срок действия QR-кода истек
                     </p>
                 )}
 
                 <button
-                    className={styles.refreshBtn}
+                    className={`${styles.authCard__refreshBtn} btn-primary`}
                     onClick={refreshQr}
                     disabled={isLoading || !isExpired}
                 >
@@ -77,8 +79,8 @@ export const AuthScreen = () => {
 
                 {!isExpired && !isLoading && (
                     <p
-                        className={styles.loadingText}
-                        style={{ marginTop: "12px", fontSize: "12px" }}
+                        className={styles.authCard__loadingText}
+                        style={{ fontSize: "12px" }}
                     >
                         Код действителен 60 секунд
                     </p>
