@@ -4,7 +4,11 @@ import { greenApi } from "../../api/greenApi";
 import { useMessagePolling } from "../../hooks/useMessagePolling";
 import styles from "./ChatInterface.module.css";
 
-export const ChatInterface = () => {
+interface ChatInterfaceProps {
+    onLogout: () => void;
+}
+
+export const ChatInterface = ({ onLogout }: ChatInterfaceProps) => {
     useMessagePolling();
 
     const {
@@ -76,6 +80,15 @@ export const ChatInterface = () => {
         <div className={styles.chatContainer}>
             <div className={styles.chatSidebar}>
                 <div className={styles.chatSidebar__header}>MAX Messenger</div>
+                <button
+                    type="button"
+                    className={styles.logoutButton}
+                    onClick={onLogout}
+                    title="Выйти из аккаунта"
+                >
+                    Выйти
+                </button>
+
                 <form
                     className={styles.chatSidebar__newChat}
                     onSubmit={handleStartChat}
@@ -128,7 +141,7 @@ export const ChatInterface = () => {
                         </div>
 
                         <form
-                            className={styles.chatWindow__inputForm}
+                            className={`${styles.chatWindow__inputForm} input-primary`}
                             onSubmit={handleSendMessage}
                         >
                             <input

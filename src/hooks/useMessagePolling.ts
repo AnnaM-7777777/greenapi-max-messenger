@@ -3,12 +3,13 @@ import { greenApi } from "../api/greenApi";
 import { useMessenger } from "../context/MessengerContext";
 
 export const useMessagePolling = () => {
-    const { addMessage, currentChatId, isAuthorized } = useMessenger();
+    const { addMessage, currentChatId } = useMessenger();
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const processedMessagesRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
-        if (!isAuthorized || !currentChatId) {
+        // Запускаем опрос ТОЛЬКО если выбран чат
+        if (!currentChatId) {
             if (intervalRef.current) clearInterval(intervalRef.current);
             return;
         }
@@ -30,40 +31,33 @@ export const useMessagePolling = () => {
                     if (isIncoming && isText && text) {
                         const messageId = body.idMessage;
 
+                        // Защита от дубликатов
                         if (processedMessagesRef.current.has(messageId)) {
-                            console.log(
-                                "⏭️ Дубликат от сервера, пропускаем добавление:",
-                                messageId,
-                            );
-                        } else {
-                            processedMessagesRef.current.add(messageId);
-
-                            const newMessage = {
-                                idMessage: messageId,
-                                timestamp: body.timestamp,
-                                typeMessage: "textMessage",
-                                chatId: currentChatId,
-                                senderId: body.senderData.sender,
-                                senderName:
-                                    body.senderData.senderName || "Неизвестный",
-                                textMessage: text,
-                                isOutgoing: false,
-                            };
-
-                            console.log(
-                                "💾 Сохраняем сообщение в чат:",
-                                currentChatId,
-                                newMessage.textMessage,
-                            );
-                            addMessage(currentChatId, newMessage);
+                            return;
                         }
+                        processedMessagesRef.current.add(messageId);
+
+                        const newMessage = {
+                            idMessage: messageId,
+                            timestamp: body.timestamp,
+                            typeMessage: "textMessage",
+                            chatId: currentChatId,
+                            senderId: body.senderData.sender,
+                            senderName:
+                                body.senderData.senderName || "Неизвестный",
+                            textMessage: text,
+                            isOutgoing: false,
+                        };
+
+                        addMessage(currentChatId, newMessage);
                     }
 
+                    // Удаляем из очереди ВСЕГДА
                     await greenApi.deleteNotification(receiptId);
                 }
             } catch (error: unknown) {
                 const err = error as Error;
-                console.error("❌ Ошибка polling:", err.message);
+                console.error("Ошибка polling:", err.message);
             }
         };
 
@@ -72,5 +66,5 @@ export const useMessagePolling = () => {
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [isAuthorized, currentChatId, addMessage]);
+    }, [currentChatId, addMessage]);
 };
