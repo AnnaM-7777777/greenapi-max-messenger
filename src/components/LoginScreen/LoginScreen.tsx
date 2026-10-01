@@ -20,7 +20,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         const cleanId = idInstance.trim();
         const cleanToken = apiToken.trim();
 
-        // 1. РЕАЛЬНАЯ ПРОВЕРКА: стучимся на сервер GREEN-API
+        // 1. ПРОВЕРКА: обращаемся к серверу GREEN-API
         const isValid = await validateCredentials(cleanId, cleanToken);
 
         if (isValid) {
@@ -42,18 +42,18 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     return (
         <div className={styles.loginContainer}>
             <div className={styles.loginCard}>
-                <h2 className={styles.title}>MAX Messenger</h2>
-                <p className={styles.subtitle}>
+                <h2 className={styles.loginCard__title}>MAX Messenger</h2>
+                <p className={styles.loginCard__subtitle}>
                     Введите учетные данные инстанса GREEN-API
                 </p>
 
-                <form onSubmit={handleSubmit} className={styles.form}>
-                    <div className={styles.inputGroup}>
-                        <label>ID Инстанса</label>
+                <form onSubmit={handleSubmit} className={styles.loginForm}>
+                    <div className={styles.loginForm__inputGroup}>
+                        <label className={styles.loginForm__label}>ID Instance:</label>
                         <input
                             type="text"
-                            className={styles.input}
-                            placeholder="Например: 310022749647"
+                            className={`${styles.loginForm__input} input-primary`}
+                            placeholder="Например: 123456654321"
                             value={idInstance}
                             onChange={(e) => setIdInstance(e.target.value)}
                             required
@@ -61,11 +61,11 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                         />
                     </div>
 
-                    <div className={styles.inputGroup}>
-                        <label>API Token Instance</label>
+                    <div className={styles.loginForm__inputGroup}>
+                        <label className={styles.loginForm__label}>API Token Instance:</label>
                         <input
                             type="password"
-                            className={styles.input}
+                            className={`${styles.loginForm__input} input-primary`}
                             placeholder="Ваш токен из личного кабинета"
                             value={apiToken}
                             onChange={(e) => setApiToken(e.target.value)}
@@ -75,12 +75,12 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                     </div>
 
                     {error && (
-                        <div className={styles.errorMessage}>{error}</div>
+                        <div className={styles.loginForm__errorMessage}>{error}</div>
                     )}
 
                     <button
                         type="submit"
-                        className={`${styles.button} btn-primary`}
+                        className={`${styles.loginForm__btnSubmit} btn-primary`}
                         disabled={isLoading}
                     >
                         {isLoading ? "Проверка данных..." : "Войти в чат"}

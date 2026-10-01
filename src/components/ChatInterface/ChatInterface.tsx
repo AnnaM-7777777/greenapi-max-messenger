@@ -78,16 +78,19 @@ export const ChatInterface = ({ onLogout }: ChatInterfaceProps) => {
 
     return (
         <div className={styles.chatContainer}>
+            {/* Левая панель (список/выбор чата) */}
             <div className={styles.chatSidebar}>
-                <div className={styles.chatSidebar__header}>MAX Messenger</div>
-                <button
-                    type="button"
-                    className={styles.logoutButton}
-                    onClick={onLogout}
-                    title="Выйти из аккаунта"
-                >
-                    Выйти
-                </button>
+                <div className={styles.chatSidebar__header}>
+                    <h1 className={styles.chatSidebar__title}>MAX Messenger</h1>
+                    <button
+                        type="button"
+                        className={styles.chatSidebar__logoutBtn}
+                        onClick={onLogout}
+                        title="Выйти из аккаунта"
+                    >
+                        ⎘
+                    </button>
+                </div>
 
                 <form
                     className={styles.chatSidebar__newChat}
@@ -96,7 +99,7 @@ export const ChatInterface = ({ onLogout }: ChatInterfaceProps) => {
                     <input
                         type="text"
                         className={`${styles.chatSidebar__phoneInput} input-primary`}
-                        placeholder="Введите номер (79991234567)"
+                        placeholder="Введите номер 79991234567"
                         value={phoneInput}
                         onChange={(e) => setPhoneInput(e.target.value)}
                     />
@@ -115,6 +118,8 @@ export const ChatInterface = ({ onLogout }: ChatInterfaceProps) => {
                 )}
             </div>
 
+
+            {/* Правая панель (окно диалога) */}
             <div className={styles.chatWindow}>
                 {!currentChatId ? (
                     <div className={styles.emptyState}>
@@ -122,18 +127,37 @@ export const ChatInterface = ({ onLogout }: ChatInterfaceProps) => {
                     </div>
                 ) : (
                     <>
-                        <div className={styles.messagesList}>
+                        <div className={styles.chatWindow__header}>
+                            <div className={styles.chatWindow__headerInfo}>
+                                <div className={styles.chatWindow__headerName}>
+                                    {currentChatId.replace("@c.us", "")}
+                                </div>
+
+                                <div
+                                    className={styles.chatWindow__headerStatus}
+                                >
+                                    в сети
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={styles.chatWindow__messagesList}>
                             {(messages[currentChatId] || []).map((msg) => (
                                 <div
                                     key={msg.idMessage}
-                                    className={`${styles.messageBubble} ${
+                                    className={`${styles.chatWindow__messageBubble} ${
                                         msg.isOutgoing
-                                            ? styles.messageOutgoing
-                                            : styles.messageIncoming
+                                            ? styles.chatWindow__messageOutgoing
+                                            : styles.chatWindow__messageIncoming
                                     }`}
                                 >
                                     <div>{msg.textMessage}</div>
-                                    <div className={styles.messageTime}>
+
+                                    <div
+                                        className={
+                                            styles.chatWindow__messageTime
+                                        }
+                                    >
                                         {formatTime(msg.timestamp)}
                                     </div>
                                 </div>
@@ -141,7 +165,7 @@ export const ChatInterface = ({ onLogout }: ChatInterfaceProps) => {
                         </div>
 
                         <form
-                            className={`${styles.chatWindow__inputForm} input-primary`}
+                            className={styles.chatWindow__form}
                             onSubmit={handleSendMessage}
                         >
                             <input
@@ -152,6 +176,7 @@ export const ChatInterface = ({ onLogout }: ChatInterfaceProps) => {
                                 onChange={(e) => setMessageText(e.target.value)}
                                 disabled={isSending}
                             />
+
                             <button
                                 type="submit"
                                 className={styles.chatWindow__btnSend}

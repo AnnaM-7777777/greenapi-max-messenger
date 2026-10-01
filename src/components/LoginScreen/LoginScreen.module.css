@@ -2,82 +2,68 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background-color: #f4f7f9;
+    min-height: 100vh;
+    width: 100%;
 }
 
 .loginCard {
-    background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: var(--bg-card);
     padding: 32px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    width: 100%;
+    border-radius: 28px;
+    border: var(--border-line);
+    box-shadow: var(--shadow-all);
     max-width: 400px;
+    width: 100%;
+    text-align: center;
 }
 
-.title {
-    margin: 0 0 8px 0;
+.loginCard__title {
     font-size: 24px;
-    color: #007bff;
-    text-align: center;
+    font-weight: bold;
+    color: var(--text-title);
 }
 
-.subtitle {
-    margin: 0 0 24px 0;
+.loginCard__subtitle {
+    color: var(--text-subTitle);
     font-size: 14px;
-    color: #54656f;
-    text-align: center;
+    line-height: 1.5;
 }
 
-.form {
+.loginForm {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.inputGroup {
+.loginForm__inputGroup {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 6px;
 }
 
-.inputGroup label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #3b4a54;
-}
-
-.input {
-    padding: 10px 12px;
-    border: 1px solid #d1d7db;
-    border-radius: 8px;
+.loginForm__label {
+    font-family: var(--font-family-text);
     font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s;
+    color: var(--text-subTitle);
 }
 
-.input:focus {
-    border-color: #007bff;
-}
-
-.button {
-    margin-top: 8px;
-    height: 44px;
-    font-size: 15px;
-    font-weight: 600;
-}
-.errorMessage {
-    background-color: #ffebee;
-    color: #c62828;
-    padding: 10px;
-    border-radius: 6px;
-    font-size: 13px;
+.loginForm__errorMessage {
+    color: var(--text-warning);
+    font-size: 12px;
     text-align: center;
-    border: 1px solid #ef9a9a;
 }
 
-.input:disabled,
-.button:disabled {
+.loginForm__btnSubmit {
+    width: 100%;
+    margin-top: 24px;
+}
+
+.loginForm__input:disabled,
+.loginForm__btnSubmit:disabled {
     opacity: 0.7;
     cursor: not-allowed;
 }
