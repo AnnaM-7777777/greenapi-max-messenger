@@ -7,7 +7,6 @@ const API_URL = "https://3100.api.green-api.com";
 const BASE_URL = `${API_URL}/waInstance${ID_INSTANCE}`;
 
 // --- ТИПЫ ДАННЫХ ---
-
 export interface Message {
     idMessage: string;
     timestamp: number;
@@ -22,13 +21,21 @@ export interface Message {
 export interface Notification {
     receiptId: number;
     body: {
-        typeMessage: string;
+        typeWebhook: string;
         timestamp: number;
         idMessage: string;
-        chatId: string;
-        senderId: string;
-        senderName: string;
-        textMessage?: string;
+        senderData: {
+            chatId: string;
+            sender: string;
+            senderName: string;
+        };
+        messageData: {
+            typeMessage: string;
+            textMessageData?: {
+                textMessage: string;
+            };
+            fileMessageData?: any;
+        };
     };
 }
 
@@ -42,7 +49,6 @@ interface GetStateResponse {
 }
 
 // --- МЕТОДЫ API ---
-
 export const greenApi = {
     sendMessage: async (
         chatId: string,
@@ -104,28 +110,37 @@ export const greenApi = {
         }
     },
 
+    // Чтобы молча игнорировал 408
     receiveNotification: async (): Promise<Notification | null> => {
         try {
-            const response = await axios.get<Notification | null>(
-                `${BASE_URL}/ReceiveNotification/${API_TOKEN_INSTANCE}`,
+            const response = await axios.get(
+                `${BASE_URL}/receiveNotification/${API_TOKEN_INSTANCE}`,
+                { params: { receiveTimeout: 5 } },
             );
-            return response.data || null;
-        } catch {
+            return response.data;
+        } catch (error: unknown) {
+            const err = error as AxiosError;
+            // 408 - это нормальное поведение, когда очередь пуста. Не спамим в консоль.
+            if (err.response?.status === 408) {
+                return null;
+            }
+            console.error("Ошибка получения уведомления:", err.message);
             return null;
         }
     },
 
     deleteNotification: async (receiptId: number): Promise<void> => {
         try {
-            await axios.get(
-                `${BASE_URL}/DeleteNotification/${API_TOKEN_INSTANCE}`,
-                {
-                    params: { receiptId },
-                },
+            // Используем axios.delete и передаем receiptId прямо в URL
+            await axios.delete(
+                `${BASE_URL}/deleteNotification/${API_TOKEN_INSTANCE}/${receiptId}`,
             );
         } catch (error: unknown) {
             const err = error as AxiosError;
-            console.error("Ошибка удаления уведомления:", err.message);
+            // Логируем только если это не 404 (иногда сервер может вернуть 404, если сообщение уже удалено, это не критично)
+            if (err.response?.status !== 404) {
+                console.error("Ошибка удаления уведомления:", err.message);
+            }
         }
     },
 
@@ -153,6 +168,21 @@ export const greenApi = {
             const err = error as AxiosError;
             console.error("Ошибка получения QR:", err.message);
             return null;
+        }
+    },
+
+    // Метод для загрузки истории
+    getChatHistory: async (chatId: string, count: number = 100): Promise<any[]> => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/getChatHistory/${API_TOKEN_INSTANCE}`,
+                { chatId, count }
+            );
+            return response.data || [];
+        } catch (error: unknown) {
+            const err = error as AxiosError;
+            console.error("Ошибка загрузки истории чата:", err.message);
+            return [];
         }
     },
 };

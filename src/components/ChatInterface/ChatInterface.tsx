@@ -1,44 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMessenger } from "../../context/MessengerContext";
 import { greenApi } from "../../api/greenApi";
 import { useMessagePolling } from "../../hooks/useMessagePolling";
 import styles from "./ChatInterface.module.css";
 
 export const ChatInterface = () => {
-    // Запускаем опрос входящих сообщений
     useMessagePolling();
 
-    const { currentChatId, messages, setCurrentChat, addMessage } =
-        useMessenger();
+    const {
+        currentChatId,
+        messages,
+        setCurrentChat,
+        addMessage,
+        loadChatHistory,
+    } = useMessenger();
+
     const [phoneInput, setPhoneInput] = useState("");
     const [messageText, setMessageText] = useState("");
     const [isSending, setIsSending] = useState(false);
 
-    // Начало нового чата по номеру телефона
+    // Загружаем историю при открытии чата
+    useEffect(() => {
+        if (currentChatId) {
+            loadChatHistory(currentChatId);
+        }
+    }, [currentChatId, loadChatHistory]);
+
     const handleStartChat = (e: React.FormEvent) => {
         e.preventDefault();
         if (!phoneInput.trim()) return;
-
-        // Форматируем номер: убираем плюсы, пробелы, добавляем @c.us
         const cleanNumber = phoneInput.replace(/\D/g, "");
-        const chatId = `${cleanNumber}@c.us`;
-        setCurrentChat(chatId);
+        setCurrentChat(`${cleanNumber}@c.us`);
     };
 
-    // Отправка сообщения
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!messageText.trim() || !currentChatId || isSending) return;
 
         setIsSending(true);
         try {
-            // 1. Отправляем через API
             const response = await greenApi.sendMessage(
                 currentChatId,
                 messageText,
             );
 
-            // 2. Сразу добавляем в наш локальный стейт как исходящее
             const newMessage = {
                 idMessage: response.idMessage,
                 timestamp: Math.floor(Date.now() / 1000),
@@ -51,16 +56,15 @@ export const ChatInterface = () => {
             };
 
             addMessage(currentChatId, newMessage);
-            setMessageText(""); // Очищаем поле ввода
+            setMessageText("");
         } catch (error) {
             console.error("Ошибка отправки:", error);
-            alert("Не удалось отправить сообщение. Проверьте подключение.");
+            alert("Не удалось отправить сообщение.");
         } finally {
             setIsSending(false);
         }
     };
 
-    // Форматирование времени из timestamp
     const formatTime = (timestamp: number) => {
         return new Date(timestamp * 1000).toLocaleTimeString([], {
             hour: "2-digit",
@@ -70,10 +74,8 @@ export const ChatInterface = () => {
 
     return (
         <div className={styles.chatContainer}>
-            {/* Левая панель */}
             <div className={styles.chatSidebar}>
                 <div className={styles.chatSidebar__header}>MAX Messenger</div>
-
                 <form
                     className={styles.chatSidebar__newChat}
                     onSubmit={handleStartChat}
@@ -81,11 +83,10 @@ export const ChatInterface = () => {
                     <input
                         type="text"
                         className={`${styles.chatSidebar__phoneInput} input-primary`}
-                        placeholder="Введите номер (например, 79991234567)"
+                        placeholder="Введите номер (79991234567)"
                         value={phoneInput}
                         onChange={(e) => setPhoneInput(e.target.value)}
                     />
-
                     <button
                         type="submit"
                         className={`${styles.chatSidebar__btnStartChat} btn-primary`}
@@ -93,16 +94,14 @@ export const ChatInterface = () => {
                         Начать чат
                     </button>
                 </form>
-
                 {currentChatId && (
                     <div className={styles.chatSidebar__activeChat}>
-                        Активный чат:{" "}
+                        Чат:{" "}
                         <strong>{currentChatId.replace("@c.us", "")}</strong>
                     </div>
                 )}
             </div>
 
-            {/* Правая панель (Окно переписки) */}
             <div className={styles.chatWindow}>
                 {!currentChatId ? (
                     <div className={styles.emptyState}>
@@ -129,7 +128,7 @@ export const ChatInterface = () => {
                         </div>
 
                         <form
-                            className={`${styles.chatWindow__inputForm} input-primary`}
+                            className={styles.chatWindow__inputForm}
                             onSubmit={handleSendMessage}
                         >
                             <input
@@ -150,7 +149,7 @@ export const ChatInterface = () => {
                                     <span className={styles.spinner}>...</span>
                                 ) : (
                                     <svg
-                                        xmlns="http://w3.org"
+                                        xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 24 24"
                                         width="24"
                                         height="24"
@@ -159,14 +158,14 @@ export const ChatInterface = () => {
                                             width="24"
                                             height="24"
                                             rx="4"
-                                            fill="rgb(18, 140, 174)"
+                                            fill="#007BFF"
                                         />
                                         <path
                                             d="M12 5v14M12 5l-5 5M12 5l5 5"
                                             stroke="#FFFFFF"
-                                            stroke-width="1.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
                                             fill="none"
                                         />
                                     </svg>
