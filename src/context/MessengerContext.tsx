@@ -6,7 +6,7 @@ import {
     useCallback,
     type ReactNode,
 } from "react";
-import { type Message, greenApi } from "../api/greenApi";
+import { type Message, type ChatHistoryItem, greenApi } from "../api/greenApi";
 
 interface MessengerContextType {
     isAuthorized: boolean;
@@ -48,7 +48,6 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem("messages", JSON.stringify(messages));
     }, [messages]);
 
-    // useCallback гарантирует, что ссылка на функцию не изменится при рендере
     const setAuthorization = useCallback(
         (isAuth: boolean, qr: string | null) => {
             setIsAuthorized(isAuth);
@@ -83,10 +82,10 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
 
             const historyMessages: Message[] = history
                 .filter(
-                    (msg: any) =>
-                        msg.type === "incoming" || msg.type === "outgoing",
+                    (msg: ChatHistoryItem) =>
+                        msg.typeMessage === "textMessage" && msg.textMessage,
                 )
-                .map((msg: any) => ({
+                .map((msg: ChatHistoryItem) => ({
                     idMessage: msg.idMessage,
                     timestamp: msg.timestamp,
                     typeMessage: msg.typeMessage || "textMessage",
@@ -101,8 +100,9 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
                 ...prev,
                 [chatId]: historyMessages,
             }));
-        } catch (error) {
-            console.error("Ошибка загрузки истории:", error);
+        } catch (error: unknown) {
+            const err = error as Error;
+            console.error("Ошибка загрузки истории:", err.message);
         }
     }, []);
 

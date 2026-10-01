@@ -1,9 +1,8 @@
 import axios, { type AxiosError } from "axios";
 
 const ID_INSTANCE = import.meta.env.VITE_ID_INSTANCE || "310022749561";
-const API_TOKEN_INSTANCE = import.meta.env.VITE_API_TOKEN_INSTANCE || ""; // Токен из https://green-api.com/max
+const API_TOKEN_INSTANCE = import.meta.env.VITE_API_TOKEN_INSTANCE || "";
 const API_URL = "https://3100.api.green-api.com";
-
 const BASE_URL = `${API_URL}/waInstance${ID_INSTANCE}`;
 
 // --- ТИПЫ ДАННЫХ ---
@@ -34,12 +33,22 @@ export interface Notification {
             textMessageData?: {
                 textMessage: string;
             };
-            fileMessageData?: any;
+            fileMessageData?: Record<string, unknown>;
         };
     };
 }
 
-// Типы ответов от Green API
+export interface ChatHistoryItem {
+    type: string;
+    timestamp: number;
+    idMessage: string;
+    chatId: string;
+    senderId: string;
+    senderName?: string;
+    typeMessage?: string;
+    textMessage?: string;
+}
+
 interface SendMessageResponse {
     idMessage: string;
 }
@@ -53,9 +62,8 @@ export const greenApi = {
     sendMessage: async (
         chatId: string,
         message: string,
-        typingTime?: number, // Опциональный параметр для эффекта "печатает..."
+        typingTime?: number,
     ): Promise<SendMessageResponse> => {
-        // 1. Валидация: проверяем длину сообщения (максимум 4000 символов по документации)
         if (message.length > 4000) {
             throw new Error("Сообщение не должно превышать 4000 символов");
         }
@@ -64,7 +72,6 @@ export const greenApi = {
             ? chatId
             : `${chatId}@c.us`;
 
-        // 2. Формируем тело запроса
         const requestBody: {
             chatId: string;
             message: string;
@@ -74,7 +81,6 @@ export const greenApi = {
             message,
         };
 
-        // Добавляем typingTime только если он передан и находится в допустимом диапазоне (1000-20000 мс)
         if (typingTime && typingTime >= 1000 && typingTime <= 20000) {
             requestBody.typingTime = typingTime;
         }
@@ -87,7 +93,6 @@ export const greenApi = {
             );
             return response.data;
         } catch (error: unknown) {
-            // 3. Обработка специфичных ошибок API
             const err = error as AxiosError<{ reason?: string }>;
             const status = err.response?.status;
 
@@ -104,13 +109,10 @@ export const greenApi = {
             if (status === 500) {
                 throw new Error("Ошибка сервера: слишком большой запрос");
             }
-
-            // Пробрасываем остальные ошибки (например, проблемы с сетью)
             throw err;
         }
     },
 
-    // Чтобы молча игнорировал 408
     receiveNotification: async (): Promise<Notification | null> => {
         try {
             const response = await axios.get(
@@ -120,7 +122,6 @@ export const greenApi = {
             return response.data;
         } catch (error: unknown) {
             const err = error as AxiosError;
-            // 408 - это нормальное поведение, когда очередь пуста. Не спамим в консоль.
             if (err.response?.status === 408) {
                 return null;
             }
@@ -131,13 +132,11 @@ export const greenApi = {
 
     deleteNotification: async (receiptId: number): Promise<void> => {
         try {
-            // Используем axios.delete и передаем receiptId прямо в URL
             await axios.delete(
                 `${BASE_URL}/deleteNotification/${API_TOKEN_INSTANCE}/${receiptId}`,
             );
         } catch (error: unknown) {
             const err = error as AxiosError;
-            // Логируем только если это не 404 (иногда сервер может вернуть 404, если сообщение уже удалено, это не критично)
             if (err.response?.status !== 404) {
                 console.error("Ошибка удаления уведомления:", err.message);
             }
@@ -160,8 +159,6 @@ export const greenApi = {
             const response = await axios.get(
                 `${BASE_URL}/qr/${API_TOKEN_INSTANCE}`,
             );
-
-            // Добавляем префикс, чтобы браузер распознал base64 как картинку
             const qrBase64 = response.data.message;
             return qrBase64 ? `data:image/png;base64,${qrBase64}` : null;
         } catch (error: unknown) {
@@ -171,12 +168,14 @@ export const greenApi = {
         }
     },
 
-    // Метод для загрузки истории
-    getChatHistory: async (chatId: string, count: number = 100): Promise<any[]> => {
+    getChatHistory: async (
+        chatId: string,
+        count: number = 100,
+    ): Promise<ChatHistoryItem[]> => {
         try {
-            const response = await axios.post(
+            const response = await axios.post<ChatHistoryItem[]>(
                 `${BASE_URL}/getChatHistory/${API_TOKEN_INSTANCE}`,
-                { chatId, count }
+                { chatId, count },
             );
             return response.data || [];
         } catch (error: unknown) {
