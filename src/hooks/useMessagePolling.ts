@@ -1,52 +1,70 @@
 import { useEffect, useRef } from "react";
-import { greenApi, type Message } from "../api/greenApi";
+import { greenApi } from "../api/greenApi";
 import { useMessenger } from "../context/MessengerContext";
 
 export const useMessagePolling = () => {
-    const { isAuthorized, addMessage } = useMessenger();
+    const { addMessage, currentChatId } = useMessenger();
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const processedMessagesRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
-        if (!isAuthorized) {
+        // Запускаем опрос ТОЛЬКО если выбран чат
+        if (!currentChatId) {
             if (intervalRef.current) clearInterval(intervalRef.current);
             return;
         }
 
         const poll = async () => {
-            // 1. Пытаемся получить уведомление из очереди
-            const notification = await greenApi.receiveNotification();
+            try {
+                const notification = await greenApi.receiveNotification();
 
-            if (
-                notification &&
-                notification.body.typeMessage === "textMessage"
-            ) {
-                const { body, receiptId } = notification;
+                if (notification) {
+                    const { receiptId, body } = notification;
 
-                // 2. Формируем объект сообщения для нашего стейта
-                const newMessage: Message = {
-                    idMessage: body.idMessage,
-                    timestamp: body.timestamp,
-                    typeMessage: body.typeMessage,
-                    chatId: body.chatId,
-                    senderId: body.senderId,
-                    senderName: body.senderName || "Неизвестный",
-                    textMessage: body.textMessage,
-                    isOutgoing: false, // Раз пришло через ReceiveNotification, значит входящее
-                };
+                    const isIncoming =
+                        body?.typeWebhook === "incomingMessageReceived";
+                    const isText =
+                        body?.messageData?.typeMessage === "textMessage";
+                    const text =
+                        body?.messageData?.textMessageData?.textMessage;
 
-                // 3. Добавляем в глобальный стейт
-                addMessage(body.chatId, newMessage);
+                    if (isIncoming && isText && text) {
+                        const messageId = body.idMessage;
 
-                // 4. Обязательно удаляем из очереди Green API, чтобы не получить его снова!
-                await greenApi.deleteNotification(receiptId);
+                        // Защита от дубликатов
+                        if (processedMessagesRef.current.has(messageId)) {
+                            return;
+                        }
+                        processedMessagesRef.current.add(messageId);
+
+                        const newMessage = {
+                            idMessage: messageId,
+                            timestamp: body.timestamp,
+                            typeMessage: "textMessage",
+                            chatId: currentChatId,
+                            senderId: body.senderData.sender,
+                            senderName:
+                                body.senderData.senderName || "Неизвестный",
+                            textMessage: text,
+                            isOutgoing: false,
+                        };
+
+                        addMessage(currentChatId, newMessage);
+                    }
+
+                    // Удаляем из очереди ВСЕГДА
+                    await greenApi.deleteNotification(receiptId);
+                }
+            } catch (error: unknown) {
+                const err = error as Error;
+                console.error("Ошибка polling:", err.message);
             }
         };
 
-        // Опрос каждые 2 секунды
         intervalRef.current = setInterval(poll, 2000);
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [isAuthorized, addMessage]);
+    }, [currentChatId, addMessage]);
 };

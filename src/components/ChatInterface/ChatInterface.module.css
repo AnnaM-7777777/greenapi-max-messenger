@@ -1,77 +1,100 @@
 .chatContainer {
     display: flex;
     height: 100vh;
-    background-color: #e5ddd5; /* Классический фон мессенджеров */
 }
 
 /* Левая панель (список/выбор чата) */
-.sidebar {
-    width: 350px;
-    background-color: #ffffff;
-    border-right: 1px solid #d1d7db;
-    display: flex;
-    flex-direction: column;
+.chatSidebar {
+    width: 393px;
+    background-color: var(--bg-primary);
+    border-right: var(--border-line);
 }
 
-.sidebarHeader {
-    padding: 16px;
-    background-color: #f0f2f5;
-    border-bottom: 1px solid #d1d7db;
+.chatSidebar__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+}
+
+.chatSidebar__title {
     font-weight: bold;
     font-size: 18px;
-    color: #41525d;
+    color: var(--text-title);
 }
 
-.newChatForm {
-    padding: 16px;
-    border-bottom: 1px solid #e9edef;
-}
-
-.phoneInput {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #d1d7db;
-    border-radius: 8px;
-    font-size: 14px;
-    margin-bottom: 8px;
-    outline: none;
-}
-
-.phoneInput:focus {
-    border-color: #00a884;
-}
-
-.startChatBtn {
-    width: 100%;
-    padding: 10px;
-    background-color: #00a884;
-    color: white;
+.chatSidebar__logoutBtn {
+    background: none;
     border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
+    color: var(--text-title);
     cursor: pointer;
+    font-size: 48px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.chatSidebar__logoutBtn:hover {
+    text-shadow: 0 0 10px var(--btn-primary-hover), 0 0 20px var(--btn-primary-hover), 0 0 40px var(--btn-primary-hover);
+}
+
+.chatSidebar__newChat {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 16px 16px;
+    border-bottom: var(--border-line);
+}
+
+.chatSidebar__phoneInput {
+    width: 100%;
+}
+
+.chatSidebar__btnStartChat {
+    width: 100%;
     transition: background-color 0.2s;
 }
 
-.startChatBtn:hover {
-    background-color: #008f6f;
-}
-
-.activeChatInfo {
+.chatSidebar__activeChat {
     padding: 16px;
-    background-color: #f0f2f5;
+    background-color: var(--bg-chat);
     font-size: 14px;
-    color: #41525d;
+    color: var(--text-primary);
 }
 
-/* Правая панель (окно переписки) */
+/* Правая панель (окно диалога) */
 .chatWindow {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png"); /* Фон WhatsApp */
+    background-color: var(--bg-incoming); 
+    background-image: url("../../assets/max-pattern.svg");
     background-repeat: repeat;
+    background-size: 200px 200px;
+}
+
+.chatWindow__header {
+    padding: 12px 16px;
+    background-color: var(--bg-primary);
+    border-bottom: var(--border-line);
+}
+
+.chatWindow__headerInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.chatWindow__headerName {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-title);
+}
+
+.chatWindow__headerStatus {
+    font-size: 12px;
+    color: var(--text-subTitle);
 }
 
 .emptyState {
@@ -79,85 +102,103 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f0f2f5;
     color: #41525d;
     font-size: 16px;
 }
 
-.messagesList {
+.chatWindow__messagesList {
     flex: 1;
-    overflow-y: auto;
-    padding: 20px;
+    overflow-y: auto; /* Оставляем, чтобы прокрутка работала */
+    padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    
+    /* Скрываем полосу прокрутки для Firefox */
+    scrollbar-width: none; 
+    
+    /* Плавная прокрутка (опционально, для красоты) */
+    scroll-behavior: smooth; 
 }
 
-.messageBubble {
+/* Скрываем полосу прокрутки для Chrome, Safari, Edge и Opera */
+.chatWindow__messagesList::-webkit-scrollbar {
+    display: none;
+}
+
+.chatWindow__messageBubble {
     max-width: 60%;
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 14px;
     line-height: 1.4;
     position: relative;
     word-wrap: break-word;
 }
 
-.messageIncoming {
-    background-color: #ffffff;
+.chatWindow__messageIncoming,
+.chatWindow__messageOutgoing {
+    font-family: var(--font-family-text);
+    font-size: 16px;
+    box-shadow: var(--shadow-chat);
+}
+
+.chatWindow__messageIncoming {
+    background-color: var(--bg-incoming);
     align-self: flex-start;
     border-top-left-radius: 0;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
-.messageOutgoing {
-    background-color: #d9fdd3;
+.chatWindow__messageOutgoing {
+    background-color: var(--bg-outgoing);
     align-self: flex-end;
-    border-top-right-radius: 0;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    border-bottom-right-radius: 0;
 }
 
-.messageTime {
+.chatWindow__messageTime {
     font-size: 11px;
-    color: #667781;
+    color: var(--text-subTitle);
     text-align: right;
     margin-top: 4px;
 }
 
 /* Панель ввода сообщения */
-.inputArea {
-    padding: 10px 16px;
-    background-color: #f0f2f5;
+.chatWindow__form {
+    display: flex;    
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background-color: var(--bg-primary);
+    border: var(--border-line);
+    border-radius: 16px;
+    height: 48px !important;
+    margin: 0 16px 16px;
+    padding: 0 16px;
+    outline: none;
+    overflow: hidden;
+}
+
+.chatWindow__inputArea {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    outline: none;
+    border: none;
+    font-family: var(--font-family-text);
+    font-weight: 400;
+    font-size: 16px;
+}
+
+.chatWindow__btnSend {
     display: flex;
     align-items: center;
-    gap: 10px;
-}
-
-.messageInput {
-    flex: 1;
-    padding: 12px;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+    width: fit-content;
+    height: 24px;
     border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    outline: none;
-}
-
-.sendBtn {
-    padding: 10px 20px;
-    background-color: #00a884;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 50%;
+    background: none;
     cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.sendBtn:hover {
-    background-color: #008f6f;
-}
-
-.sendBtn:disabled {
-    background-color: #8696a0;
-    cursor: not-allowed;
 }

@@ -1,0 +1,148 @@
+:root {
+    /* Фон */
+    --bg-primary: rgb(255, 255, 255); /* Основной фон страницы */
+    --bg-secondary: rgba(255, 255, 255, 0); /* Прозрачный фон */
+    --bg-card: linear-gradient(
+        180deg,
+        rgb(228, 248, 255) 0%,
+        rgb(241, 249, 252) 100%
+    ); /* Фон карточки (окна) с qr кодом */
+    --bg-chat: rgba(0, 122, 255, 0.078); /* Фон выбранного чата */
+    --bg-incoming: rgb(214, 245, 253); /* Фон моего сообщения в чате */
+    --bg-outgoing: rgb(162, 212, 226); /* Фон сообщения собеседника в чате */
+
+    /* Кнопки, ссылки */
+    --btn-primary: rgb(18, 140, 174);
+    --btn-primary-hover: rgba(18, 140, 174, 0.692);
+    --btn-primary-active: rgba(10, 146, 184, 0.692);
+    --btn-primary-noActive: rgb(153, 160, 165);
+
+    /* Цвет текста */
+    --text-primary: rgba(0, 0, 0, 1);
+    --text-secondary: rgba(255, 255, 255, 1);
+    --text-placeholder: rgba(208, 206, 206, 1);
+    --text-title: rgb(31, 41, 55);
+    --text-subTitle: rgb(75, 85, 99);
+    --text-warning: rgb(240, 5, 25);
+
+    /* Границы */
+    --border-line: 1px solid rgb(209, 215, 219); /* цвет линий разделения */
+    --border-input: 1px solid rgb(18, 140, 174); /* border input */
+
+    /* Тени */
+    --shadow-all: 0 4px 24px rgba(0, 0, 0, 0.08); /* Тень у блоков */
+    --shadow-chat: 0 4px 24px rgba(0, 0, 0, 0.14); /* Тень у блоков */
+    /* --shadow-btn: 0 4px 8px rgba(40, 183, 226, 0.3); */ /* Тень у кнопок */
+    --shadow-btn: 0 0 0 3px rgba(18, 140, 174, 0.15); /* Тень у кнопок */
+
+    /* Стиль шрифта */
+    --font-family-text:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family-text);
+    background-color: var(--bg-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+}
+
+a {
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+/* Дополнительные классы для кнопок (универсальные) */
+.btn-primary,
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-family-text);
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 16px;
+    text-decoration: none;
+    box-sizing: border-box;
+    height: 42px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background-color: var(--btn-primary);
+    color: var(--text-secondary);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--btn-primary-hover);
+    box-shadow: var(--shadow-btn);
+}
+
+.btn-primary:active:not(:disabled) {
+    background-color: var(--btn-primary-active);
+    transform: scale(0.97);
+    box-shadow: none;
+    transition: transform 0.05s ease;
+}
+
+.btn-primary:disabled {
+    background-color: var(--btn-primary-noActive);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Дополнительные классы для инпутов (универсальные) */
+.input-primary {
+    width: 100%;
+    font-family: var(--font-family-text);
+    font-weight: 400;
+    font-size: 14px;
+    border-radius: 16px;
+    box-sizing: border-box;
+    padding: 0 16px;
+    height: 42px;
+    outline: none;
+    border: var(--border-line);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.input-primary::placeholder {
+    color: var(--text-placeholder);
+    opacity: 1;
+}
+
+.input-primary:focus {
+    border-color: var(--btn-primary);
+    box-shadow: var(--shadow-btn);
+}
+
+.input-primary:disabled {
+    background-color: rgba(0, 0, 0, 0.05);
+    cursor: not-allowed;
+}

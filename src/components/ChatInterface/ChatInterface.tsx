@@ -1,44 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMessenger } from "../../context/MessengerContext";
 import { greenApi } from "../../api/greenApi";
 import { useMessagePolling } from "../../hooks/useMessagePolling";
 import styles from "./ChatInterface.module.css";
 
-export const ChatInterface = () => {
-    // Запускаем опрос входящих сообщений
+interface ChatInterfaceProps {
+    onLogout: () => void;
+}
+
+export const ChatInterface = ({ onLogout }: ChatInterfaceProps) => {
     useMessagePolling();
 
-    const { currentChatId, messages, setCurrentChat, addMessage } =
-        useMessenger();
+    const {
+        currentChatId,
+        messages,
+        setCurrentChat,
+        addMessage,
+        loadChatHistory,
+    } = useMessenger();
+
     const [phoneInput, setPhoneInput] = useState("");
     const [messageText, setMessageText] = useState("");
     const [isSending, setIsSending] = useState(false);
 
-    // Начало нового чата по номеру телефона
+    // Загружаем историю при открытии чата
+    useEffect(() => {
+        if (currentChatId) {
+            loadChatHistory(currentChatId);
+        }
+    }, [currentChatId, loadChatHistory]);
+
     const handleStartChat = (e: React.FormEvent) => {
         e.preventDefault();
         if (!phoneInput.trim()) return;
-
-        // Форматируем номер: убираем плюсы, пробелы, добавляем @c.us
         const cleanNumber = phoneInput.replace(/\D/g, "");
-        const chatId = `${cleanNumber}@c.us`;
-        setCurrentChat(chatId);
+        setCurrentChat(`${cleanNumber}@c.us`);
     };
 
-    // Отправка сообщения
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!messageText.trim() || !currentChatId || isSending) return;
 
         setIsSending(true);
         try {
-            // 1. Отправляем через API
             const response = await greenApi.sendMessage(
                 currentChatId,
                 messageText,
             );
 
-            // 2. Сразу добавляем в наш локальный стейт как исходящее
             const newMessage = {
                 idMessage: response.idMessage,
                 timestamp: Math.floor(Date.now() / 1000),
@@ -51,16 +60,15 @@ export const ChatInterface = () => {
             };
 
             addMessage(currentChatId, newMessage);
-            setMessageText(""); // Очищаем поле ввода
+            setMessageText("");
         } catch (error) {
             console.error("Ошибка отправки:", error);
-            alert("Не удалось отправить сообщение. Проверьте подключение.");
+            alert("Не удалось отправить сообщение.");
         } finally {
             setIsSending(false);
         }
     };
 
-    // Форматирование времени из timestamp
     const formatTime = (timestamp: number) => {
         return new Date(timestamp * 1000).toLocaleTimeString([], {
             hour: "2-digit",
@@ -70,32 +78,48 @@ export const ChatInterface = () => {
 
     return (
         <div className={styles.chatContainer}>
-            {/* Левая панель */}
-            <div className={styles.sidebar}>
-                <div className={styles.sidebarHeader}>MAX Messenger</div>
+            {/* Левая панель (список/выбор чата) */}
+            <div className={styles.chatSidebar}>
+                <div className={styles.chatSidebar__header}>
+                    <h1 className={styles.chatSidebar__title}>MAX Messenger</h1>
+                    <button
+                        type="button"
+                        className={styles.chatSidebar__logoutBtn}
+                        onClick={onLogout}
+                        title="Выйти из аккаунта"
+                    >
+                        ⎘
+                    </button>
+                </div>
 
-                <form className={styles.newChatForm} onSubmit={handleStartChat}>
+                <form
+                    className={styles.chatSidebar__newChat}
+                    onSubmit={handleStartChat}
+                >
                     <input
                         type="text"
-                        className={styles.phoneInput}
-                        placeholder="Введите номер (например, 79991234567)"
+                        className={`${styles.chatSidebar__phoneInput} input-primary`}
+                        placeholder="Введите номер 79991234567"
                         value={phoneInput}
                         onChange={(e) => setPhoneInput(e.target.value)}
                     />
-                    <button type="submit" className={styles.startChatBtn}>
+                    <button
+                        type="submit"
+                        className={`${styles.chatSidebar__btnStartChat} btn-primary`}
+                    >
                         Начать чат
                     </button>
                 </form>
-
                 {currentChatId && (
-                    <div className={styles.activeChatInfo}>
-                        Активный чат:{" "}
+                    <div className={styles.chatSidebar__activeChat}>
+                        Чат:{" "}
                         <strong>{currentChatId.replace("@c.us", "")}</strong>
                     </div>
                 )}
             </div>
 
-            {/* Правая панель (Окно переписки) */}
+
+            {/* Правая панель (окно диалога) */}
             <div className={styles.chatWindow}>
                 {!currentChatId ? (
                     <div className={styles.emptyState}>
@@ -103,18 +127,37 @@ export const ChatInterface = () => {
                     </div>
                 ) : (
                     <>
-                        <div className={styles.messagesList}>
+                        <div className={styles.chatWindow__header}>
+                            <div className={styles.chatWindow__headerInfo}>
+                                <div className={styles.chatWindow__headerName}>
+                                    {currentChatId.replace("@c.us", "")}
+                                </div>
+
+                                <div
+                                    className={styles.chatWindow__headerStatus}
+                                >
+                                    в сети
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={styles.chatWindow__messagesList}>
                             {(messages[currentChatId] || []).map((msg) => (
                                 <div
                                     key={msg.idMessage}
-                                    className={`${styles.messageBubble} ${
+                                    className={`${styles.chatWindow__messageBubble} ${
                                         msg.isOutgoing
-                                            ? styles.messageOutgoing
-                                            : styles.messageIncoming
+                                            ? styles.chatWindow__messageOutgoing
+                                            : styles.chatWindow__messageIncoming
                                     }`}
                                 >
                                     <div>{msg.textMessage}</div>
-                                    <div className={styles.messageTime}>
+
+                                    <div
+                                        className={
+                                            styles.chatWindow__messageTime
+                                        }
+                                    >
                                         {formatTime(msg.timestamp)}
                                     </div>
                                 </div>
@@ -122,23 +165,49 @@ export const ChatInterface = () => {
                         </div>
 
                         <form
-                            className={styles.inputArea}
+                            className={styles.chatWindow__form}
                             onSubmit={handleSendMessage}
                         >
                             <input
                                 type="text"
-                                className={styles.messageInput}
-                                placeholder="Введите сообщение..."
+                                className={styles.chatWindow__inputArea}
+                                placeholder="Сообщение..."
                                 value={messageText}
                                 onChange={(e) => setMessageText(e.target.value)}
                                 disabled={isSending}
                             />
+
                             <button
                                 type="submit"
-                                className={styles.sendBtn}
+                                className={styles.chatWindow__btnSend}
                                 disabled={isSending || !messageText.trim()}
+                                aria-label="Отправить сообщение"
                             >
-                                {isSending ? "..." : "Отправить"}
+                                {isSending ? (
+                                    <span className={styles.spinner}>...</span>
+                                ) : (
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        width="24"
+                                        height="24"
+                                    >
+                                        <rect
+                                            width="24"
+                                            height="24"
+                                            rx="4"
+                                            fill="#007BFF"
+                                        />
+                                        <path
+                                            d="M12 5v14M12 5l-5 5M12 5l5 5"
+                                            stroke="#FFFFFF"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            fill="none"
+                                        />
+                                    </svg>
+                                )}
                             </button>
                         </form>
                     </>

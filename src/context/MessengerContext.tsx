@@ -1,63 +1,102 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
-import { type Message } from "../api/greenApi";
+import {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    useCallback,
+    type ReactNode,
+} from "react";
+import { type Message, greenApi } from "../api/greenApi";
 
-// Описываем, что будет хранить и уметь наш контекст
 interface MessengerContextType {
     currentChatId: string | null;
     messages: Record<string, Message[]>;
-    isAuthorized: boolean;
-    qrCode: string | null;
     setCurrentChat: (chatId: string) => void;
     addMessage: (chatId: string, message: Message) => void;
-    setAuthorization: (isAuth: boolean, qr?: string | null) => void;
+    loadChatHistory: (chatId: string) => Promise<void>;
 }
 
 const MessengerContext = createContext<MessengerContextType | undefined>(
     undefined,
 );
 
-// Провайдер, который будет оборачивать всё приложение
 export const MessengerProvider = ({ children }: { children: ReactNode }) => {
-    const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-    const [messages, setMessages] = useState<Record<string, Message[]>>({});
-    const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
-    const [qrCode, setQrCode] = useState<string | null>(null);
+    const [currentChatId, setCurrentChatId] = useState<string | null>(
+        () => localStorage.getItem("currentChatId") || null,
+    );
+    const [messages, setMessages] = useState<Record<string, Message[]>>(() => {
+        const saved = localStorage.getItem("messages");
+        return saved ? JSON.parse(saved) : {};
+    });
 
-    const setCurrentChat = (chatId: string) => setCurrentChatId(chatId);
+    useEffect(() => {
+        if (currentChatId) localStorage.setItem("currentChatId", currentChatId);
+        else localStorage.removeItem("currentChatId");
+    }, [currentChatId]);
 
-    const addMessage = (chatId: string, message: Message) => {
-        setMessages((prevMessages) => {
-            const chatMessages = prevMessages[chatId] || [];
+    useEffect(() => {
+        localStorage.setItem("messages", JSON.stringify(messages));
+    }, [messages]);
 
-            // Проверка на дубликаты, чтобы не добавить одно сообщение дважды
-            if (chatMessages.some((m) => m.idMessage === message.idMessage)) {
-                return prevMessages;
+    const setCurrentChat = useCallback(
+        (chatId: string) => setCurrentChatId(chatId),
+        [],
+    );
+
+    const addMessage = useCallback((chatId: string, message: Message) => {
+        setMessages((prev) => {
+            const chatMessages = prev[chatId] || [];
+            if (chatMessages.some((msg) => msg.idMessage === message.idMessage))
+                return prev;
+            return { ...prev, [chatId]: [...chatMessages, message] };
+        });
+    }, []);
+
+    const loadChatHistory = useCallback(async (chatId: string) => {
+        try {
+            const history = await greenApi.getChatHistory(chatId, 100);
+
+            // ЗАЩИТА: Если сервер вернул пустой массив, НЕ стираем сохраненные сообщения!
+            if (!history || history.length === 0) {
+                return;
             }
 
-            return {
-                ...prevMessages,
-                [chatId]: [...chatMessages, message].sort(
-                    (a, b) => a.timestamp - b.timestamp,
-                ),
-            };
-        });
-    };
+            const historyMessages: Message[] = history
+                .filter(
+                    (msg: any) =>
+                        msg.typeMessage === "textMessage" && msg.textMessage,
+                )
+                .map((msg: any) => ({
+                    idMessage: msg.idMessage,
+                    timestamp: msg.timestamp,
+                    typeMessage: msg.typeMessage || "textMessage",
+                    chatId: msg.chatId,
+                    senderId: msg.senderId || "unknown",
+                    senderName: msg.senderName || "Неизвестный",
+                    textMessage: msg.textMessage || "",
+                    isOutgoing: msg.type === "outgoing",
+                }));
 
-    const setAuthorization = (isAuth: boolean, qr: string | null = null) => {
-        setIsAuthorized(isAuth);
-        setQrCode(qr);
-    };
+            setMessages((prev) => {
+                // ЗАЩИТА: Если в стейте уже есть сообщения для этого чата, НЕ перезаписываем их!
+                if (prev[chatId] && prev[chatId].length > 0) {
+                    return prev;
+                }
+                return { ...prev, [chatId]: historyMessages };
+            });
+        } catch (error) {
+            console.error("Ошибка загрузки истории:", error);
+        }
+    }, []);
 
     return (
         <MessengerContext.Provider
             value={{
                 currentChatId,
                 messages,
-                isAuthorized,
-                qrCode,
                 setCurrentChat,
                 addMessage,
-                setAuthorization,
+                loadChatHistory,
             }}
         >
             {children}
@@ -65,11 +104,9 @@ export const MessengerProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
-// Удобный хук для использования контекста в компонентах
 export const useMessenger = () => {
     const context = useContext(MessengerContext);
-    if (!context) {
+    if (!context)
         throw new Error("useMessenger must be used within a MessengerProvider");
-    }
     return context;
 };
